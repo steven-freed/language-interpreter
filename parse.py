@@ -1,6 +1,4 @@
-from pprint import pprint
-from astnodes import (Number, BinOp, Expr, Module,
-AST, Token)
+from nodes import Number, BinOp, Expr, AST, Token
 
 
 def log(fn):
@@ -11,14 +9,19 @@ def log(fn):
 		
 		
 class Parser:
-
+	'''
+	Grammar
+		expr: term { ('+' | '-') term }
+		term: factor { ('*' | '/' | '%') factor }
+		factor: number
+	'''
 	def run(self, tokens):
-		return self.__parse__(tokens)
+		return self.parse(tokens)
 	
-	def __parse__(self, tokens):
-		tree = AST(Module())
+	def parse(self, tokens):
+		tree = AST()
 		while len(tokens):
-				tree.module.body.append(self.expr(tokens))
+			tree.add_node(self.expr(tokens))
 		return tree
 		
 	def expr(self, tokens):

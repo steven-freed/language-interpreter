@@ -14,31 +14,27 @@ class Token:
 
 
 class AST:
-	
-	def __init__(self, module):
-		self.module = module
-	
-			
-class Module:
-	
-	def __init__(self, body=[]):
-		self.body = body
-		
+	def __init__(self):
+		self.tree = []
+
+	def add_node(self, node):
+		self.tree.append(node)
+
+	def get_nodes(self):
+		return self.tree
+
 
 class Expr:
-	
 	def __init__(self, value):
 		self.value = value
 
 
 class BinOp:
-	
 	def __init__(self, left, op, right):
 		self.left = left
 		self.op = op
 		self.right = right
 
 class Number:
-	
 	def __init__(self, value):
 		self.value = Decimal(value)

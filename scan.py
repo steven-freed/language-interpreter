@@ -1,6 +1,5 @@
 import re
-from astnodes import Token
-from pprint import pprint
+from nodes import Token
 
 
 class Queue:
@@ -23,6 +22,9 @@ class Queue:
 		except IndexError:
 			return None
 	
+	def clear(self):
+		self.q = []
+	
 	def __len__(self):
 		return len(self.q)
 		
@@ -33,9 +35,9 @@ class Queue:
 class Scanner:
 	
 	def run(self, strinput):
-		return self.__scan__(strinput)
+		return self.scan(strinput)
 		
-	def __scan__(self, strinput):
+	def scan(self, strinput):
 		tokens = Queue()
 		lineno, lineoff = 0, 0
 		while lineoff < len(strinput):
@@ -66,6 +68,6 @@ class Scanner:
 			elif tok == '\n':
 				lineno += 1
 			else:
-				raise SyntaxError(f'Token {too} not recognized on line {lineno} offset {lineoff}')
+				raise SyntaxError(f'Token "{tok}" not recognized on line {lineno} offset {lineoff}')
 		return tokens
 	
