@@ -1,6 +1,6 @@
 import sys, traceback
-from scan import Scanner
-from parse import Parser
+from scanner import Scanner
+from parser import Parser
 
 
 class Visitor:
