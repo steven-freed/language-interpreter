@@ -30,10 +30,4 @@ If Needed, Use Precedence
 6
 ```
 
-See History To Enter Previous Commands
-```py
-> 2 + 4
-6
-> last
-2 + 4
-```
+See History Press 'Up Arrow' Key

@@ -1,4 +1,4 @@
-import sys, traceback
+import sys, traceback, readline
 from scanner import Scanner
 from parser import Parser
 
@@ -38,6 +38,7 @@ class Interpreter(Visitor):
 	def visit_Number(self, node):
 		return node.value
 
+
 class Repl:
 
 	class Color:
@@ -54,12 +55,8 @@ class Repl:
 	QUIT_CMDS = (
 		'quit', 'q'
 	)
-	HIST_CMDS = (
-		'last'
-	)
 
 	def __init__(self):
-		self.history_stack = []
 		self.scanner = Scanner()
 		self.parser = Parser()
 		self.interpreter = Interpreter()
@@ -70,8 +67,6 @@ class Repl:
 			try:
 				user_input = input(self.CMD.format(end=self.Color.END, color=self.Color.USER))
 				if self.is_quit_cmd(user_input): break
-				if self.is_hist_cmd(user_input): continue
-				self.add_to_history(user_input)
 				tokens = self.scanner.run(user_input)
 				tree = self.parser.run(tokens)
 				self.interpreter.run(tree)
@@ -88,19 +83,6 @@ class Repl:
 			return True
 		else:
 			return False
-
-	def is_hist_cmd(self, user_input):
-		if user_input.lower() in self.HIST_CMDS:
-			try:
-				print(self.history_stack.pop())
-			except IndexError:
-				print('No more history available')
-			return True
-		else:
-			return False
-
-	def add_to_history(self, user_input):
-		self.history_stack.append(user_input)
 	
 
 if __name__ == '__main__':
