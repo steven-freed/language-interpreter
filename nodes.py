@@ -1,4 +1,5 @@
 from decimal import Decimal
+from abc import ABC, abstractmethod
 
 class Token:
 	
@@ -13,7 +14,15 @@ class Token:
 		return str(data)
 
 
-class AST:
+class ASTNode(ABC):
+
+	@abstractmethod
+	def accept(self, visitor):
+		raise NotImplementedError(
+			f'Please implement the "accept" method to accept a visitor for the "{self.__class__.__name__}" node'
+		)
+
+class AST(ASTNode):
 	def __init__(self):
 		self.tree = []
 
@@ -23,18 +32,30 @@ class AST:
 	def get_nodes(self):
 		return self.tree
 
+	def accept(self, visitor):
+		return visitor.visit_AST(self)
 
-class Expr:
+
+class Expr(ASTNode):
 	def __init__(self, value):
 		self.value = value
 
+	def accept(self, visitor):
+		return visitor.visit_Expr(self)
 
-class BinOp:
+
+class BinOp(ASTNode):
 	def __init__(self, left, op, right):
 		self.left = left
 		self.op = op
 		self.right = right
 
-class Number:
+	def accept(self, visitor):
+		return visitor.visit_BinOp(self)
+
+class Number(ASTNode):
 	def __init__(self, value):
 		self.value = Decimal(value)
+
+	def accept(self, visitor):
+		return visitor.visit_Number(self)

@@ -1,13 +1,27 @@
 import sys, traceback, readline
+from abc import ABC, abstractmethod
 from scanner import Scanner
 from parser import Parser
 
 
 class Visitor:
+
+	@abstractmethod
+	def visit_AST(self, ast):
+		raise NotImplementedError(f'Please implement the visitor method for AST')
+
+	@abstractmethod
+	def visit_Expr(self, expr):
+		raise NotImplementedError(f'Please implement the visitor method for Expr')
+		
+	@abstractmethod
+	def visit_BinOp(self, binop):
+		raise NotImplementedError(f'Please implement the visitor method for BinOp')
+		
+	@abstractmethod
+	def visit_Number(self, number):
+		raise NotImplementedError(f'Please implement the visitor method for Number')
 	
-	def visit(self, node):
-		visitor = getattr(self, 'visit_' + type(node).__name__)
-		return visitor(node)
 		
 class Interpreter(Visitor):
 		
@@ -15,28 +29,28 @@ class Interpreter(Visitor):
 		self.interpret(tree)
 		
 	def interpret(self, tree):
-		return self.visit(tree)
-
-	def visit_AST(self, node):
-		return [print(self.visit(n)) for n in node.get_nodes()]
+		return tree.accept(self)
+	
+	def visit_AST(self, ast):
+		return [print(n.accept(self)) for n in ast.get_nodes()]
 		
-	def visit_Expr(self, node):
-		return self.visit(node.value)
+	def visit_Expr(self, expr):
+		return expr.value.accept(self)
 		
-	def visit_BinOp(self, node):
-		if node.op == '+':
-			return self.visit(node.left) + self.visit(node.right)
-		elif node.op == '-':
-			return self.visit(node.left) - self.visit(node.right)
-		elif node.op == '*':
-			return self.visit(node.left) * self.visit(node.right)
-		elif node.op == '/':
-			return self.visit(node.left) / self.visit(node.right)
-		elif node.op == '%':
-			return self.visit(node.left) % self.visit(node.right)
+	def visit_BinOp(self, binop):
+		if binop.op == '+':
+			return binop.left.accept(self) + binop.right.accept(self)
+		elif binop.op == '-':
+			return binop.left.accept(self) - binop.right.accept(self)
+		elif binop.op == '*':
+			return binop.left.accept(self) * binop.right.accept(self)
+		elif binop.op == '/':
+			return binop.left.accept(self) / binop.right.accept(self)
+		elif binop.op == '%':
+			return binop.left.accept(self) % binop.right.accept(self)
 		 
-	def visit_Number(self, node):
-		return node.value
+	def visit_Number(self, number):
+		return number.value
 
 
 class Repl:
