@@ -2,6 +2,7 @@ import sys, traceback, readline
 from abc import ABC, abstractmethod
 from scanner import Scanner
 from parser import Parser
+from nodes import Context
 
 
 class Visitor:
@@ -25,14 +26,34 @@ class Visitor:
 		
 class Interpreter(Visitor):
 		
+	def __init__(self):
+		self.globalvars = {}
+
 	def run(self, tree):
 		self.interpret(tree)
 		
 	def interpret(self, tree):
-		return tree.accept(self)
-	
+		out = tree.accept(self)
+		if all(out):
+			print(*out)
+
 	def visit_AST(self, ast):
-		return [print(n.accept(self)) for n in ast.get_nodes()]
+		return [n.accept(self) for n in ast.get_nodes()]
+
+	def visit_Stmt(self, stmt):
+		return stmt.value.accept(self)
+
+	def visit_Stmts(self, stmts):
+		return stmts.value.accept(self)
+
+	def visit_SingularStmt(self, singular_stmt):
+		return singular_stmt.value.accept(self)
+
+	def visit_Assign(self, assign):
+		name = assign.target
+		value = assign.value.accept(self)
+		if name.context == Context.STORE:
+			self.globalvars[name.ident] = value
 		
 	def visit_Expr(self, expr):
 		return expr.value.accept(self)
@@ -49,6 +70,10 @@ class Interpreter(Visitor):
 		elif binop.op == '%':
 			return binop.left.accept(self) % binop.right.accept(self)
 		 
+	def visit_Name(self, name):
+		if name.context == Context.LOAD:
+			return self.globalvars[name.ident]
+	
 	def visit_Number(self, number):
 		return number.value
 

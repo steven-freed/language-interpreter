@@ -30,4 +30,11 @@ If Needed, Use Precedence
 6
 ```
 
+4. Add Variables
+```py
+> x ::= 5
+> x + 5
+10
+```
+
 See History Press 'Up Arrow' Key

@@ -1,35 +1,6 @@
 import re
+from utils import Queue
 from nodes import Token
-
-
-class Queue:
-	
-	def __init__(self, collection=[]):
-		self.q = collection
-		
-	def enqueue(self, node):
-		self.q.append(node)
-		
-	def dequeue(self):
-		try:
-			return self.q.pop(0)
-		except IndexError:
-			return None
-		
-	def peek(self):
-		try:
-			return self.q[0]
-		except IndexError:
-			return None
-	
-	def clear(self):
-		self.q = []
-	
-	def __len__(self):
-		return len(self.q)
-		
-	def __str__(self):
-		return str([str(i) for i in self.q])
 		
 	
 class Scanner:
@@ -65,6 +36,12 @@ class Scanner:
 			elif bool(re.search(r'[()]', tok)):
 				tokens.enqueue(Token('paren', tok, lineno, lineoff))
 				lineoff += 1
+			elif bool(re.search(r':', tok)):
+				lineoff += 1
+				while lineoff < len(strinput) and bool(re.search(r'(:|=)', strinput[lineoff])):
+					tok += strinput[lineoff]
+					lineoff += 1
+				tokens.enqueue(Token('store', tok, lineno, lineoff))
 			elif tok == '\n':
 				lineno += 1
 			else:

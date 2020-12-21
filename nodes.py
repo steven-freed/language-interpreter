@@ -1,6 +1,7 @@
 from decimal import Decimal
 from abc import ABC, abstractmethod
 
+
 class Token:
 	
 	def __init__(self, type, value, lineno, lineoff):
@@ -36,6 +37,43 @@ class AST(ASTNode):
 		return visitor.visit_AST(self)
 
 
+class Stmt(ASTNode):
+
+	def __init__(self, value):
+		self.value = value
+	
+	def accept(self, visitor):
+		return visitor.visit_Stmt(self)
+
+
+class Stmts(ASTNode):
+
+	def __init__(self, value):
+		self.value = value
+	
+	def accept(self, visitor):
+		return visitor.visit_Stmts(self)
+
+
+class SingularStmt(ASTNode):
+
+	def __init__(self, value):
+		self.value = value
+	
+	def accept(self, visitor):
+		return visitor.visit_SingularStmt(self)
+
+
+class Assign(ASTNode):
+
+	def __init__(self, target, value):
+		self.target = target
+		self.value = value
+	
+	def accept(self, visitor):
+		return visitor.visit_Assign(self)
+
+
 class Expr(ASTNode):
 	def __init__(self, value):
 		self.value = value
@@ -53,9 +91,24 @@ class BinOp(ASTNode):
 	def accept(self, visitor):
 		return visitor.visit_BinOp(self)
 
+
+class Name(ASTNode):
+	def __init__(self, ident, context):
+		self.ident = ident
+		self.context = context
+
+	def accept(self, visitor):
+		return visitor.visit_Name(self)
+
+
 class Number(ASTNode):
 	def __init__(self, value):
 		self.value = Decimal(value)
 
 	def accept(self, visitor):
 		return visitor.visit_Number(self)
+
+
+class Context:
+	LOAD = 1
+	STORE = 2
