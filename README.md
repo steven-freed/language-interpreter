@@ -1,5 +1,5 @@
 # Simple Math Grammar Interpreter #
-Interpreter written in Python, C version in the works with a full language implementation.
+Language Interpreter Written in Python
 
 ### EBNF Grammar ###
 found in /src/grammar.md
