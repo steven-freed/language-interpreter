@@ -3,9 +3,15 @@ from abc import ABC, abstractmethod
 from scanner import Scanner
 from parser import Parser
 from nodes import Context
+from utils import (
+	Symbol, SymbolTable, Scope
+)
+from exc import (
+	TypeException, UndeclaredException
+)
 
 
-class Visitor:
+class Visitor(ABC):
 
 	@abstractmethod
 	def visit_AST(self, ast):
@@ -27,14 +33,14 @@ class Visitor:
 class Interpreter(Visitor):
 		
 	def __init__(self):
-		self.globalvars = {}
+		self.symtable = SymbolTable()
 
 	def run(self, tree):
 		self.interpret(tree)
 		
 	def interpret(self, tree):
 		out = tree.accept(self)
-		if all(out):
+		if None not in out:
 			print(*out)
 
 	def visit_AST(self, ast):
@@ -53,29 +59,50 @@ class Interpreter(Visitor):
 		name = assign.target
 		value = assign.value.accept(self)
 		if name.context == Context.STORE:
-			self.globalvars[name.ident] = value
+			self.symtable.add(Symbol(name.ident, Scope.GLOBAL, value))
 		
 	def visit_Expr(self, expr):
 		return expr.value.accept(self)
 		
 	def visit_BinOp(self, binop):
-		if binop.op == '+':
-			return binop.left.accept(self) + binop.right.accept(self)
-		elif binop.op == '-':
-			return binop.left.accept(self) - binop.right.accept(self)
-		elif binop.op == '*':
-			return binop.left.accept(self) * binop.right.accept(self)
-		elif binop.op == '/':
-			return binop.left.accept(self) / binop.right.accept(self)
-		elif binop.op == '%':
-			return binop.left.accept(self) % binop.right.accept(self)
+		left, right = binop.left.accept(self), binop.right.accept(self)
+		try:
+			if binop.op == '+':
+				return left + right
+			elif binop.op == '-':
+				return left.value - right
+			elif binop.op == '*':
+				return left * right
+			elif binop.op == '/':
+				return left / right
+			elif binop.op == '%':
+				return left % right
+			# elif binop.op == 'AND':
+			# 	return bool(left and right)
+			# elif binop.op == 'OR':
+			# 	return bool(left or right)
+		except Exception:
+			raise TypeException(f"Attempted '{binop.op}' on incompatible operand types")
 		 
 	def visit_Name(self, name):
-		if name.context == Context.LOAD:
-			return self.globalvars[name.ident]
+		try:
+			if name.context == Context.LOAD:
+				return self.symtable[name.ident].value
+		except KeyError:
+			raise UndeclaredException(f'Variable "{name.ident}" is undeclared or out of scope')
 	
 	def visit_Number(self, number):
 		return number.value
+	
+	def visit_String(self, string):
+		return string.value
+
+	def visit_Boolean(self, boolean):
+		return boolean.value
+
+	def visit_Empty(self, empty):
+		return empty.value
+
 
 
 class Repl:

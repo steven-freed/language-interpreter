@@ -30,11 +30,15 @@ If Needed, Use Precedence
 6
 ```
 
-4. Add Variables
+4. Declare variables for types; Empty, String, Number, Boolean
 ```py
-> x ::= 5
-> x + 5
-10
+> x ::= {}
+> x ::= "hello"
+> x ::= 'world'
+> x ::= 123
+> x ::= 123.45
+> x ::= TRUE
+> x ::= FALSE
 ```
 
 See History Press 'Up Arrow' Key

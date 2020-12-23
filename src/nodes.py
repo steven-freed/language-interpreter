@@ -4,14 +4,13 @@ from abc import ABC, abstractmethod
 
 class Token:
 	
-	def __init__(self, type, value, lineno, lineoff):
+	def __init__(self, type, value, lineinfo):
 		self.type = type
 		self.value = value
-		self.lineno = lineno
-		self.lineoff = lineoff
+		self.lineinfo = lineinfo # tuple (lineno, lineoff)
 		
 	def __str__(self):
-		data = self.type, self.value, self.lineno, self.lineoff
+		data = self.type, self.value, self.lineinfo
 		return str(data)
 
 
@@ -25,13 +24,13 @@ class ASTNode(ABC):
 
 class AST(ASTNode):
 	def __init__(self):
-		self.tree = []
+		self.branches = []
 
 	def add_node(self, node):
-		self.tree.append(node)
+		self.branches.append(node)
 
 	def get_nodes(self):
-		return self.tree
+		return self.branches
 
 	def accept(self, visitor):
 		return visitor.visit_AST(self)
@@ -107,6 +106,30 @@ class Number(ASTNode):
 
 	def accept(self, visitor):
 		return visitor.visit_Number(self)
+
+
+class String(ASTNode):
+	def __init__(self, value):
+		self.value = str(value[1:-1])
+
+	def accept(self, visitor):
+		return visitor.visit_String(self)
+
+
+class Boolean(ASTNode):
+	def __init__(self, value):
+		self.value = True if value == 'TRUE' else False
+
+	def accept(self, visitor):
+		return visitor.visit_Boolean(self)
+
+
+class Empty(ASTNode):
+	def __init__(self):
+		self.value = None
+
+	def accept(self, visitor):
+		return visitor.visit_Empty(self)
 
 
 class Context:
