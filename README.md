@@ -2,11 +2,7 @@
 Interpreter written in Python, C version in the works with a full language implementation.
 
 ### EBNF Grammar ###
-```
-expr:       term { ('+' | '-') term }
-term:       factor { ('*' | '/' | '%') factor }
-factor:     '(' expr ')' | number
-```
+found in /src/grammar.md
 
 ### Quick Start: Repl ###
 1. Clone Repo
