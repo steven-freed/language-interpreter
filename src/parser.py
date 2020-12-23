@@ -3,8 +3,8 @@ from utils import (
 	log, Stack
 )
 from nodes import (
-	Number, BinOp, Expr, AST, Token, Context, SingularStmt,
-	Assign, Name, Stmt, Stmts, String, Boolean, Empty
+	Number, BinOp, Expr, AST, Token, Context,
+	Assign, Name, String, Boolean, Empty
 )
 
 		
@@ -18,21 +18,21 @@ class Parser:
 	def parse(self, tokens):
 		tree = AST()
 		while len(tokens):
-			tree.add_node(self.stmt(tokens))
+			tree.add_branch(self.stmt(tokens))
 		return tree
 		
 	def stmt(self, tokens):
-		return Stmt(self.stmts(tokens))
+		return self.stmts(tokens)
 	
 	def stmts(self, tokens):
-		return Stmts(self.singular_stmt(tokens))
+		return self.singular_stmt(tokens)
 
 	def singular_stmt(self, tokens):
 		node = self.expr(tokens)
 		if isinstance(node, Name) and self.match(tokens.peek(), '::='):
 			tokens.push(self.callstack.pop())
 			node = self.assign(tokens)
-		return SingularStmt(node)
+		return node
 
 	def assign(self, tokens):
 		name = self.atom(tokens)

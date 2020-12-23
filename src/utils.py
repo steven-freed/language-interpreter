@@ -111,37 +111,3 @@ class Stack:
 		
     def __str__(self):
 	    return str([str(i) for i in self.stack])
-
-
-class SymbolTable:
-
-    def __init__(self):
-        self.table = {}
-
-    def add(self, symbol):
-        self.table[symbol.name] = symbol
-
-    def remove(self, name):
-        del self.table[symbol.name]
-
-    def __getitem__(self, key):
-        return self.table[key]
-
-    def __str__(self):
-        return str(self.table)
-
-
-class Symbol:
-
-    def __init__(self, name, scope, value):
-        self.name = name
-        self.scope = scope
-        self.value = value
-
-    def __str__(self):
-        return f'{self.name} {self.scope} {self.value}'
-
-
-class Scope:
-    GLOBAL = 1
-    BLOCK = 2

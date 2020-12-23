@@ -1,5 +1,6 @@
 from decimal import Decimal
 from abc import ABC, abstractmethod
+from enum import Enum
 
 
 class Token:
@@ -14,6 +15,37 @@ class Token:
 		return str(data)
 
 
+class Visitor(ABC):
+
+	@abstractmethod
+	def visit_AST(self, ast):
+		raise NotImplementedError(f'Please implement the visitor method for AST')
+
+	@abstractmethod
+	def visit_Expr(self, expr):
+		raise NotImplementedError(f'Please implement the visitor method for Expr')
+
+	@abstractmethod
+	def visit_Assign(self, assign):
+		raise NotImplementedError(f'Please implement the visitor method for Assign')
+		
+	@abstractmethod
+	def visit_BinOp(self, binop):
+		raise NotImplementedError(f'Please implement the visitor method for BinOp')
+		
+	@abstractmethod
+	def visit_Number(self, number):
+		raise NotImplementedError(f'Please implement the visitor method for Number')
+
+	@abstractmethod
+	def visit_String(self, string):
+		raise NotImplementedError(f'Please implement the visitor method for String')
+
+	@abstractmethod
+	def visit_Empty(self, empty):
+		raise NotImplementedError(f'Please implement the visitor method for Empty')
+
+
 class ASTNode(ABC):
 
 	@abstractmethod
@@ -26,41 +58,11 @@ class AST(ASTNode):
 	def __init__(self):
 		self.branches = []
 
-	def add_node(self, node):
+	def add_branch(self, node):
 		self.branches.append(node)
-
-	def get_nodes(self):
-		return self.branches
 
 	def accept(self, visitor):
 		return visitor.visit_AST(self)
-
-
-class Stmt(ASTNode):
-
-	def __init__(self, value):
-		self.value = value
-	
-	def accept(self, visitor):
-		return visitor.visit_Stmt(self)
-
-
-class Stmts(ASTNode):
-
-	def __init__(self, value):
-		self.value = value
-	
-	def accept(self, visitor):
-		return visitor.visit_Stmts(self)
-
-
-class SingularStmt(ASTNode):
-
-	def __init__(self, value):
-		self.value = value
-	
-	def accept(self, visitor):
-		return visitor.visit_SingularStmt(self)
 
 
 class Assign(ASTNode):
