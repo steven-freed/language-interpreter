@@ -24,6 +24,17 @@ def isbool(string):
 def isempty(string):
     return string == '{}'
 
+def apply_operator(compfn, args, size):
+    if size - 2 >= 0:
+        cur = args[size - 1]
+        nxt = args[size - 2]
+        if compfn(nxt, cur):
+            return apply_operator(compfn, args, size - 1)
+        else:
+            return False
+    else:
+        return True
+
 
 class Queue:
 

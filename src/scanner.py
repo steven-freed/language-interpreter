@@ -55,6 +55,16 @@ class Scanner:
 			elif bool(re.search(r'[+-/*%]', tok)):
 				tokens.enqueue(Token('op', tok, get_lineinfo()))
 				lineoff += 1
+			elif bool(re.search(r'[<>=]', tok)):
+				comp = tok
+				lineoff += 1
+				while lineoff < len(strinput) and bool(re.search(r'[<>=]', strinput[lineoff])):
+					comp += strinput[lineoff]
+					lineoff += 1
+				tokens.enqueue(Token('cmp', comp, get_lineinfo()))
+			elif tok == '~':
+				tokens.enqueue(Token('inversion', tok, get_lineinfo())) 
+				lineoff += 1
 			elif bool(re.search(r'[()]', tok)):
 				tokens.enqueue(Token('paren', tok, get_lineinfo()))
 				lineoff += 1

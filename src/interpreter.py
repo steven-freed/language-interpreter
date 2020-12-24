@@ -1,10 +1,11 @@
-import sys, traceback, readline
+import sys, traceback, readline, operator
+from utils import apply_operator
 from scanner import Scanner
 from parser import Parser
 from nodes import Context
 from analyzer import SemanticAnalyzer
 from nodes import Visitor
-from symbols import SymbolTable
+from symbols import SymbolTable, Symbol, Scope
 	
 		
 class Interpreter(Visitor):
@@ -33,30 +34,38 @@ class Interpreter(Visitor):
 	def visit_Assign(self, assign):
 		name = assign.target
 		value = assign.value.accept(self)
+		if name.context == Context.STORE:
+			self.symtable.add(Symbol(name.ident, Scope.BLOCK, value, assign.value))
 		
 	def visit_Expr(self, expr):
 		return expr.value.accept(self)
 		
 	def visit_BinOp(self, binop):
 		left, right = binop.left.accept(self), binop.right.accept(self)
-		if binop.op == '+':
-			return left + right
-		elif binop.op == '-':
-			return left.value - right
-		elif binop.op == '*':
-			return left * right
-		elif binop.op == '/':
-			return left / right
-		elif binop.op == '%':
-			return left % right
-		# elif binop.op == 'AND':
-		# 	return bool(left and right)
-		# elif binop.op == 'OR':
-		# 	return bool(left or right)
+		opmap = {
+			'+': operator.add, '-': operator.sub,
+			'*': operator.mul, '/': operator.truediv,
+			'%': operator.mod
+		}
+		return opmap[binop.op](left, right)
+
+	def visit_Compare(self, comp):
+		opmap = {
+			'=': operator.eq, '<>': operator.ne,
+			'<': operator.lt, '>': operator.gt,
+			'<=': operator.le, '>=': operator.ge,
+			'OR': lambda a,b: a or b, 'AND': lambda a,b: a and b
+		}
+		ops, comparators = [op for op in comp.ops], [comparator.accept(self) for comparator in comp.comparators]
+		result = True
+		for i, op in enumerate(ops):
+			a, b = comparators[i], comparators[i + 1]
+			result = result and opmap[op](a, b)
+		return result
 		 
 	def visit_Name(self, name):
 		if name.context == Context.LOAD:
-			return self.symtable[name.ident].astnode.accept(self)
+			return self.symtable[name.ident].value
 	
 	def visit_Number(self, number):
 		return number.value
@@ -104,9 +113,9 @@ class Repl:
 				if self.is_quit_cmd(user_input): break
 				tokens = self.scanner.run(user_input)
 				tree = self.parser.run(tokens)
-				symtable = self.symtable.run(tree)
-				self.analyzer.run(tree, symtable)
-				self.interpreter.run(tree, symtable)
+				#symtable = self.symtable.run(tree)
+				#self.analyzer.run(tree, self.symtable)
+				self.interpreter.run(tree, self.symtable)
 			except KeyboardInterrupt:
 				print('\n' + self.EXIT.format(color=self.Color.HEADER, end=self.Color.END))
 				break

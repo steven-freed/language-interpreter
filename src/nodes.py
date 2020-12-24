@@ -93,6 +93,15 @@ class BinOp(ASTNode):
 		return visitor.visit_BinOp(self)
 
 
+class Compare(ASTNode):
+	def __init__(self, ops, comparators):
+		self.ops = ops
+		self.comparators = comparators
+
+	def accept(self, visitor):
+		return visitor.visit_Compare(self)
+
+
 class Name(ASTNode):
 	def __init__(self, ident, context):
 		self.ident = ident
@@ -120,10 +129,13 @@ class String(ASTNode):
 
 class Boolean(ASTNode):
 	def __init__(self, value):
-		self.value = True if value == 'TRUE' else False
+		self.value = True if value in (True, 'TRUE') else False
 
 	def accept(self, visitor):
 		return visitor.visit_Boolean(self)
+
+	def __repr__(self):
+		return 'TRUE' if self.value else 'FALSE'
 
 
 class Empty(ASTNode):

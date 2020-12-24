@@ -3,13 +3,14 @@ from nodes import Visitor
 
 class Symbol:
 
-    def __init__(self, ident, scope, astnode):
+    def __init__(self, ident, scope, value, astnode):
         self.ident = ident
         self.scope = scope
+        self.value = value
         self.astnode = astnode
 
     def __str__(self):
-        return f'{self.ident} {self.scope} {self.astnode}'
+        return f'({self.ident},{self.scope},{self.value})'
 
 
 class Scope:
@@ -32,10 +33,11 @@ class SymbolTable(Visitor):
         return self.table[key]
 
     def __str__(self):
-        return "Symbol Table: " + ','.join([ident for ident, _ in self.table.items()])
+        return "Symbol Table: " + ','.join([ident + str(sym) for ident, sym in self.table.items()])
 
     def run(self, tree):
         self.analyze(tree)
+        print(str(self))
         return self
 
     def analyze(self, tree):
@@ -49,22 +51,26 @@ class SymbolTable(Visitor):
         
     def visit_Assign(self, assign):
         name = assign.target
-        value = assign.value
+        value = assign.value.accept(self)
+        node = assign.value
         self.add(
-            Symbol(name.ident, Scope.BLOCK, value)
+            Symbol(name.ident, Scope.BLOCK, value, node)
         )
 
     def visit_BinOp(self, binop):
-        binop.left.accept(self), binop.right.accept(self)
+        left, right = binop.left.accept(self), binop.right.accept(self)
        
+    def visit_Compare(self, comp):
+        [op.accept(self) for op in comp.ops], [comparator.accept(self) for comparator in comp.comparators]
+
     def visit_Name(self, name):
-        pass
+        return name
 
     def visit_Number(self, number):
-        pass
+        return number
     
     def visit_String(self, string):
-        pass
+        return string
     
     def visit_Empty(self, empty):
-        pass
+        return empty

@@ -10,6 +10,17 @@ singular_stmt:
 assign:
     NAME '::=' expr
 expr:
+    disjuncton
+disjunction:
+    conjunction { 'OR' conjunction }
+conjunction:
+    inversion { 'AND' inversion }
+inversion:
+    | '~' inversion
+    | comparison
+comparison:
+    sum { ('=' | '<>' | '<=' | '<' | '>=' | '>') sum }
+sum:
     term { ('+' | '-') term }
 term:
     factor { ('*' | '/' | '%') factor }
