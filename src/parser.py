@@ -2,7 +2,6 @@ from utils import (
 	isfloat, isstr, isbool, isempty,
 	log, Stack
 )
-from symbols import Symbol, Scope
 from nodes import (
 	Number, BinOp, Expr, AST, Token, Context,
 	Assign, Name, String, Boolean, Empty, Compare
