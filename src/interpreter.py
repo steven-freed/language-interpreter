@@ -2,7 +2,9 @@ import sys, traceback, readline, operator
 from utils import apply_operator
 from scanner import Scanner
 from parser import Parser
-from nodes import Context
+from nodes import (
+	Context, Boolean
+)
 from analyzer import SemanticAnalyzer
 from memory import Heap, Symbol, Scope
 from nodes import Visitor
@@ -10,7 +12,7 @@ from exc import (
 	TypeException
 )
 	
-		
+
 class Interpreter(Visitor):
 
 	def __init__(self, verbose=False):
@@ -22,7 +24,7 @@ class Interpreter(Visitor):
 	def interpret(self, tree):
 		out = tree.accept(self)
 		if None not in out:
-			print(*out)
+			print(*out, file=sys.stdout)
 
 	def visit_AST(self, ast):
 		return [branch.accept(self) for branch in ast.branches]
@@ -47,15 +49,17 @@ class Interpreter(Visitor):
 		
 	def visit_BinOp(self, binop):
 		left, right = binop.left.accept(self), binop.right.accept(self)
-		ltype, rtype = left.__class__.__name__, right.__class__.__name__
 		if type(left) != type(right):
-			raise TypeException(f'Cannot apply {binop.op} operator to types {ltype} and {rtype}')
-		opmap = {
-			'+': operator.add, '-': operator.sub,
-			'*': operator.mul, '/': operator.truediv,
-			'%': operator.mod
-		}
-		return opmap[binop.op](left, right)
+			raise TypeException(f'Cannot apply {binop.op} operator to types {left.__class__.__name__} and {right.__class__.__name__}')
+		else:
+			result_node = type(left) or type(right)
+			opmap = {
+				'+': operator.add, '-': operator.sub,
+				'*': operator.mul, '/': operator.truediv,
+				'%': operator.mod
+			}
+			result_value = opmap[binop.op](left.value, right.value)
+			return result_node(result_value)
 
 	def visit_Compare(self, comp):
 		opmap = {
@@ -69,23 +73,23 @@ class Interpreter(Visitor):
 		for i, op in enumerate(ops):
 			a, b = comparators[i], comparators[i + 1]
 			result = result and opmap[op](a, b)
-		return result
+		return Boolean(result)
 		 
 	def visit_Name(self, name):
 		if name.context == Context.LOAD:
 			return self.heap.get(name.ident).address
 
 	def visit_Number(self, number):
-		return number.value
+		return number
 	
 	def visit_String(self, string):
-		return string.value
+		return string
 
 	def visit_Boolean(self, boolean):
-		return boolean.value
+		return boolean
 
 	def visit_Empty(self, empty):
-		return empty.value
+		return empty
 
 
 

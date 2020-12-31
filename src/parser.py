@@ -1,5 +1,5 @@
 from utils import (
-	isfloat, isstr, isbool, isempty,
+	isfloat, isbool, isempty,
 	log, Stack
 )
 from nodes import (
@@ -39,10 +39,10 @@ class Parser:
 		tokens.pop()
 		value = self.expr(tokens)
 		return Assign(name, value)
-
+	
 	def expr(self, tokens):
 		return Expr(self.disjunction(tokens))
-
+	
 	def disjunction(self, tokens):
 		node = self.conjunction(tokens)
 		ops, comparators = [], [node]
@@ -53,7 +53,7 @@ class Parser:
 			comparators.append(comparator)
 			node = Compare(ops, comparators)
 		return node
-
+	
 	def conjunction(self, tokens):
 		node = self.inversion(tokens)
 		ops, comparators = [], [node]
@@ -64,7 +64,7 @@ class Parser:
 			comparators.append(comparator)
 			node = Compare(ops, comparators)
 		return node
-
+	
 	def inversion(self, tokens):
 		if self.match(tokens.peek(), '~'):
 			tokens.pop()
@@ -72,7 +72,7 @@ class Parser:
 		else:
 			node = self.comparison(tokens)
 		return node
-
+	
 	def comparison(self, tokens):
 		node = self.sum(tokens)
 		ops, comparators = [], [node]
@@ -90,7 +90,7 @@ class Parser:
 			comparators.append(comparator)
 			node = Compare(ops, comparators)
 		return node
-
+	
 	def sum(self, tokens):
 		node = self.term(tokens)
 		while self.match(tokens.peek(), '+') or \
@@ -98,7 +98,7 @@ class Parser:
 			op = tokens.pop()
 			node = BinOp(node, op.value, self.term(tokens))
 		return node
-
+	
 	def term(self, tokens):
 		node = self.factor(tokens)
 		while self.match(tokens.peek(), '*') or \
@@ -107,7 +107,7 @@ class Parser:
 			op = tokens.pop()
 			node = BinOp(node, op.value, self.factor(tokens))
 		return node
-
+	
 	def factor(self, tokens):
 		node = tokens.peek()
 		if self.match(node, '('):
@@ -119,19 +119,19 @@ class Parser:
 		elif node.type == 'const':
 			node = self.atom(tokens)
 		return node
-
+	
 	def atom(self, tokens):
 		token = tokens.pop()
 		self.callstack.push(token)
 		if isfloat(token.value):
 			node = Number(token.value)
-		elif isstr(token.value):
-			node = String(token.value)
 		elif isbool(token.value):
 			node = Boolean(token.value)
 		elif isempty(token.value):
 			node = Empty()
-		else:
+		elif token.type == 'const':
+			node = String(token.value)
+		elif token.type == 'id':
 			if self.match(tokens.peek(), '::='):
 				node = Name(token.value, Context.STORE)
 			else:

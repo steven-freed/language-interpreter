@@ -21,13 +21,13 @@ class Scanner:
 			tok = strinput[lineoff]
 			get_lineinfo = self.cache_lineinfo(lineno, lineoff)
 			if bool(re.search(r'["\']', tok)):
-				string = tok
 				closing_quote = tok
+				lineoff += 1
+				string = strinput[lineoff]
 				lineoff += 1
 				while not bool(re.search(r'[{}]'.format(closing_quote), strinput[lineoff])):
 					string += strinput[lineoff]
 					lineoff += 1
-				string += strinput[lineoff]
 				lineoff += 1
 				tokens.enqueue(Token('const', string, get_lineinfo()))
 			elif bool(re.search(r'[0-9]', tok)) or tok == '-':
@@ -86,6 +86,5 @@ class Scanner:
 			elif tok == '\n':
 				lineno += 1
 			else:
-				print(tokens)
 				raise SyntaxError(f'Token "{tok}" not recognized on line {lineno} offset {lineoff}')
 		return tokens

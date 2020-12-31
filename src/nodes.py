@@ -118,24 +118,40 @@ class Number(ASTNode):
 	def accept(self, visitor):
 		return visitor.visit_Number(self)
 
+	def __str__(self):
+		return str(self.value)
+
 
 class String(ASTNode):
 	def __init__(self, value):
-		self.value = str(value[1:-1])
+		self.value = value
 
 	def accept(self, visitor):
 		return visitor.visit_String(self)
 
+	def __str__(self):
+		return '"' + str(self.value) + '"'
+
 
 class Boolean(ASTNode):
+
+	TRUE = 'TRUE'
+	FALSE = 'FALSE'
+
 	def __init__(self, value):
-		self.value = True if value in (True, 'TRUE') else False
+		if value == self.TRUE:
+			self.value = True
+		else:
+			self.value = False
 
 	def accept(self, visitor):
 		return visitor.visit_Boolean(self)
 
-	def __repr__(self):
-		return 'TRUE' if self.value else 'FALSE'
+	def __str__(self):
+		if self.value:
+			return self.TRUE
+		else:
+			return self.FALSE
 
 
 class Empty(ASTNode):
@@ -144,6 +160,9 @@ class Empty(ASTNode):
 
 	def accept(self, visitor):
 		return visitor.visit_Empty(self)
+
+	def __str__(self):
+		return "{}"
 
 
 class Context:

@@ -11,13 +11,6 @@ def isfloat(string):
     except ValueError:
         return False
 
-def isstr(string):
-    try:
-        first, last = 0, len(string) - 1
-        return (string[first] == '"' and string[last] == '"') or (string[first] == "'" and string[last] == "'")
-    except ValueError:
-        return False
-
 def isbool(string):
     return string == 'TRUE' or string == 'FALSE'
 
