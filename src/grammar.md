@@ -3,10 +3,31 @@
 stmt:
     stmts
 stmts:
-    singular_stmt
+    | singular_stmt
+    | compound_stmt
 singular_stmt:
     | expr
     | assign
+compound_stmt:
+    function_dec
+function_dec:
+    [NAME] '(' [params] ')' '->' block
+block:
+    | '{' statements '}'
+    | singular_stmt
+params:
+    | parameters
+parameters:
+    | param_no_default
+    | param_with_default
+param_no_default:
+    param (',' | ')')
+param_with_default:
+    param param_default (',' | ')')
+param_default:
+    '=' expression
+param:
+    NAME
 assign:
     NAME '::=' expr
 expr:

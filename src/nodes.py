@@ -131,6 +131,26 @@ class BoolOp(ASTNode):
 		return visitor.visit_BoolOp(self)
 
 
+class Arg(ASTNode):
+	def __init__(self, ident, default=None):
+		self.ident = ident
+		self.default = default
+	
+	def visit_Arg(self, visitor):
+		return visitor.visit_Arg(self)
+
+
+class FunctionDec(ASTNode):
+	def __init__(self, ident, args=[], body=[], returns=None):
+		self.ident = ident
+		self.args = args
+		self.body = body
+		self.returns = returns
+
+	def visit_FunctionDec(self, visitor):
+		return visitor.visit_FunctionDec(self)
+
+
 class Name(ASTNode):
 	def __init__(self, ident, context):
 		self.ident = ident

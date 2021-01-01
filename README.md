@@ -1,5 +1,5 @@
-# Simple Math Grammar Interpreter #
-Language Interpreter Written in Python
+# Interpreter #
+Interpreter Written in Python. The language currently supports Mathmatical operations & comparisons, boolean operations, and variables.
 
 ### EBNF Grammar ###
 found in /src/grammar.md
@@ -18,12 +18,16 @@ found in /src/grammar.md
 22
 ```
 
-If Needed, Use Precedence
+If Needed Use Precedence (Default is Left Associative)
 ```py
 > (2 + 4) % 5
 1
 > 2 + 4 % 5
 6
+> (FALSE AND TRUE) OR TRUE
+TRUE
+> FALSE AND (TRUE OR TRUE)
+FALSE
 ```
 
 4. Declare variables for types; Empty, String, Number, Boolean
@@ -37,4 +41,4 @@ If Needed, Use Precedence
 > x ::= FALSE
 ```
 
-See History Press 'Up Arrow' Key
+*To See History Press 'Up Arrow' Key*
