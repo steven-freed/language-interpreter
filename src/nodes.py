@@ -1,19 +1,6 @@
 from decimal import Decimal
 from abc import ABC, abstractmethod
-from enum import Enum
 import operator
-
-
-class Token:
-	
-	def __init__(self, type, value, lineinfo):
-		self.type = type
-		self.value = value
-		self.lineinfo = lineinfo # tuple (lineno, lineoff)
-		
-	def __str__(self):
-		data = self.type, self.value, self.lineinfo
-		return str(data)
 
 
 class Visitor(ABC):
@@ -131,13 +118,21 @@ class BoolOp(ASTNode):
 		return visitor.visit_BoolOp(self)
 
 
-class Arg(ASTNode):
+class Param(ASTNode):
 	def __init__(self, ident, default=None):
 		self.ident = ident
 		self.default = default
 	
-	def visit_Arg(self, visitor):
-		return visitor.visit_Arg(self)
+	def visit_Param(self, visitor):
+		return visitor.visit_Param(self)
+
+
+class Return(ASTNode):
+	def __init__(self, value=None):
+		self.value = value
+	
+	def visit_Return(self, visitor):
+		return visitor.visit_Return(self)
 
 
 class FunctionDec(ASTNode):

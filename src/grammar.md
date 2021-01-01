@@ -8,22 +8,18 @@ stmts:
 singular_stmt:
     | expr
     | assign
+    | return_stmt
+return_stmt:
+    'return' [expr]
 compound_stmt:
     function_dec
 function_dec:
     [NAME] '(' [params] ')' '->' block
 block:
-    | '{' statements '}'
+    | '{' stmts '}'
     | singular_stmt
 params:
-    | parameters
-parameters:
-    | param_no_default
-    | param_with_default
-param_no_default:
-    param (',' | ')')
-param_with_default:
-    param param_default (',' | ')')
+    param [param_default] (',' | ')')
 param_default:
     '=' expression
 param:

@@ -1,5 +1,4 @@
 import sys, traceback, readline, math
-from utils import apply_operator
 from scanner import Scanner
 from parser import Parser
 from nodes import (
@@ -23,7 +22,7 @@ class Interpreter(Visitor):
 		
 	def interpret(self, tree):
 		out = tree.accept(self)
-		if None not in out:
+		if None not in out and out:
 			print(*out, file=sys.stdout)
 
 	def visit_AST(self, ast):

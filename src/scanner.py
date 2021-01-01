@@ -1,6 +1,6 @@
 import re
 from utils import Queue
-from nodes import Token
+from tokens import Token, TokenType
 		
 	
 class Scanner:
@@ -32,31 +32,55 @@ class Scanner:
 					string += strinput[lineoff]
 					lineoff += 1
 				lineoff += 1
-				tokens.enqueue(Token('const', string, get_lineinfo()))
+				tokens.enqueue(Token(TokenType.CONST, string, get_lineinfo()))
 			elif bool(re.search(r'[0-9]', tok)) or tok == '-':
 				number = tok
 				lineoff += 1
+				if tok == '-' and lineoff < len(strinput):
+					number += strinput[lineoff]
+					lineoff += 1
+					if number == '->':
+						tokens.enqueue(Token(TokenType.ARROW, number, get_lineinfo()))
+						continue
 				while lineoff < len(strinput) and (strinput[lineoff] == '.' or bool(re.search(r'[0-9]', strinput[lineoff]))):
 					number += strinput[lineoff]
 					lineoff += 1
-				tokens.enqueue(Token('const', number, get_lineinfo()))
+				tokens.enqueue(Token(TokenType.CONST, number, get_lineinfo()))
 			elif bool(re.search(r'[a-zA-Z_]', tok)):
 				name = tok
 				lineoff += 1
 				while lineoff < len(strinput) and bool(re.search(r'[a-zA-Z_]', strinput[lineoff])):
 					name += strinput[lineoff]
 					lineoff += 1
-				if name == 'TRUE' or name == 'FALSE':
-					tokens.enqueue(Token('const', name, get_lineinfo()))
-				elif name == 'AND' or name == 'OR':
-					tokens.enqueue(Token('op', name, get_lineinfo()))
+				if name == 'TRUE':
+					tokens.enqueue(Token(TokenType.TRUE, name, get_lineinfo()))
+				elif name == 'FALSE':
+					tokens.enqueue(Token(TokenType.FALSE, name, get_lineinfo()))
+				elif name == 'AND':
+					tokens.enqueue(Token(TokenType.AND, name, get_lineinfo()))
+				elif name == 'OR':
+					tokens.enqueue(Token(TokenType.OR, name, get_lineinfo()))
+				elif name == 'NOT':
+					tokens.enqueue(Token(TokenType.NOT, name, get_lineinfo()))
+				elif name == 'return':
+					tokens.enqueue(Token(TokenType.RETURN, name, get_lineinfo()))
 				else:
-					tokens.enqueue(Token('id', name, get_lineinfo()))
+					tokens.enqueue(Token(TokenType.IDENT, name, get_lineinfo()))
 			elif bool(re.search(r'\s', tok)):
 				lineoff += 1
 				continue
-			elif bool(re.search(r'[+-/*%]', tok)):
-				tokens.enqueue(Token('op', tok, get_lineinfo()))
+			elif bool(re.search(r'[-+*/%]', tok)):
+				if tok == '+':
+					tokentype = TokenType.PLUS
+				elif tok == '-':
+					tokentype = TokenType.MINUS
+				elif tok == '/':
+					tokentype = TokenType.DIV
+				elif tok == '*':
+					tokentype = TokenType.MULT
+				elif tok == '%':
+					tokentype = TokenType.MOD
+				tokens.enqueue(Token(tokentype, tok, get_lineinfo()))
 				lineoff += 1
 			elif bool(re.search(r'[<>=]', tok)):
 				comp = tok
@@ -64,12 +88,24 @@ class Scanner:
 				while lineoff < len(strinput) and bool(re.search(r'[<>=]', strinput[lineoff])):
 					comp += strinput[lineoff]
 					lineoff += 1
-				tokens.enqueue(Token('cmp', comp, get_lineinfo()))
-			elif tok == '~':
-				tokens.enqueue(Token('inversion', tok, get_lineinfo())) 
+				if comp == '<':
+					tokentype = TokenType.LT
+				elif comp == '>':
+					tokentype = TokenType.GT
+				elif comp == '<=':
+					tokentype = TokenType.LTE
+				elif comp == '>=':
+					tokentype = TokenType.GTE
+				elif comp == '=':
+					tokentype = TokenType.EQ
+				elif comp == '<>':
+					tokentype = TokenType.NE
+				tokens.enqueue(Token(tokentype, comp, get_lineinfo()))
+			elif tok == '(':
+				tokens.enqueue(Token(TokenType.OPEN_PAREN, tok, get_lineinfo()))
 				lineoff += 1
-			elif bool(re.search(r'[()]', tok)):
-				tokens.enqueue(Token('paren', tok, get_lineinfo()))
+			elif tok == ')':
+				tokens.enqueue(Token(TokenType.CLOSED_PAREN, tok, get_lineinfo()))
 				lineoff += 1
 			elif bool(re.search(r':', tok)):
 				lineoff += 1
@@ -77,7 +113,7 @@ class Scanner:
 					lineoff += 1
 					if strinput[lineoff] == '=':
 						lineoff += 1
-						tokens.enqueue(Token('store', '::=', get_lineinfo()))
+						tokens.enqueue(Token(TokenType.STORE, '::=', get_lineinfo()))
 						continue
 				self.err(tok, lineno, lineoff)
 			elif tok == '{':
@@ -85,10 +121,19 @@ class Scanner:
 				lineoff += 1
 				obj += strinput[lineoff]
 				if strinput[lineoff] == '}':
-					tokens.enqueue(Token('const', obj, get_lineinfo()))
+					tokens.enqueue(Token(TokenType.EMPTY, obj, get_lineinfo()))
 					lineoff += 1
+				else:
+					tokens.enqueue(Token(TokenType.OPEN_BRACE, tok, get_lineinfo()))
+			elif tok == '}':
+				tokens.enqueue(Token(TokenType.CLOSED_BRACE, tok, get_lineinfo()))
+				lineoff += 1
+			elif tok == ',':
+				tokens.enqueue(Token(TokenType.COMMA, tok, get_lineinfo()))
+				lineoff += 1
 			elif tok == '\n':
 				lineno += 1
 			else:
 				self.err(tok, lineno, lineoff)
+		print(tokens)
 		return tokens
