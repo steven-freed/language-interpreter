@@ -184,8 +184,8 @@ class Boolean(ASTNode):
 
 
 class Empty(ASTNode):
-	def __init__(self):
-		self.value = None
+	def __init__(self, value=None):
+		self.value = value
 
 	def accept(self, visitor):
 		return visitor.visit_Empty(self)

@@ -1,4 +1,4 @@
-import sys, traceback, readline
+import sys, traceback, readline, math
 from utils import apply_operator
 from scanner import Scanner
 from parser import Parser
@@ -58,10 +58,12 @@ class Interpreter(Visitor):
 
 	def visit_BoolOp(self, boolop):
 		op, values = boolop.op, [value.accept(self) for value in boolop.values]
-		result = values[0].value
-		for node in values:
-			result = BoolOp.OP_MAP[op](result, node.value)
-		return Boolean(result)
+		result_node = None
+		for i in range(len(values) - 1):
+			a, b = values[i], values[i + 1]
+			result_value = BoolOp.OP_MAP[op](a.value, b.value)
+			result_node = type(a) if result_value == a.value else type(b)
+		return result_node(result_value)
 
 	def visit_Compare(self, comp):
 		ops, comparators = [op for op in comp.ops], [comparator.accept(self) for comparator in comp.comparators]
