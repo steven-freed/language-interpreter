@@ -45,6 +45,9 @@ class SemanticAnalyzer(Visitor):
         if not self.symtable.get(name.ident):
             raise UndeclaredException(f'Attempted to use variable "{name.ident}" before declaration')
 
+    def visit_Inverse(self, inverse):
+        inverse.value.accept(self)
+    
     def visit_Boolean(self, boolean):
         return boolean
         

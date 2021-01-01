@@ -183,6 +183,20 @@ class Boolean(ASTNode):
 			return self.FALSE
 
 
+class Inverse(ASTNode):
+	def __init__(self, value):
+		self.value = value
+
+	def accept(self, visitor):
+		return visitor.visit_Inverse(self)
+
+	def __str__(self):
+		if self.value:
+			return Boolean.TRUE
+		else:
+			return Boolean.FALSE
+
+
 class Empty(ASTNode):
 	def __init__(self, value=None):
 		self.value = value

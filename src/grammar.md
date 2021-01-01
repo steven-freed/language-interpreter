@@ -16,7 +16,7 @@ disjunction:
 conjunction:
     inversion { 'AND' inversion }
 inversion:
-    | '~' inversion
+    | 'NOT' inversion
     | comparison
 comparison:
     sum { ('=' | '<>' | '<=' | '<' | '>=' | '>') sum }

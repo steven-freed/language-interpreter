@@ -58,7 +58,6 @@ class Interpreter(Visitor):
 
 	def visit_BoolOp(self, boolop):
 		op, values = boolop.op, [value.accept(self) for value in boolop.values]
-		result_node = None
 		for i in range(len(values) - 1):
 			a, b = values[i], values[i + 1]
 			result_value = BoolOp.OP_MAP[op](a.value, b.value)
@@ -76,6 +75,12 @@ class Interpreter(Visitor):
 	def visit_Name(self, name):
 		if name.context == Context.LOAD:
 			return self.heap.get(name.ident).address
+
+	def visit_Inverse(self, inverse):
+		node = inverse.value
+		inverse_value = not node.value
+		node = type(node)
+		return node(inverse_value)
 
 	def visit_Number(self, number):
 		return number

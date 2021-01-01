@@ -5,7 +5,7 @@ from utils import (
 from nodes import (
 	Number, BinOp, Expr, AST, Token, Context,
 	Assign, Name, String, Boolean, Empty, Compare,
-	BoolOp
+	BoolOp, Inverse
 )
 
 		
@@ -65,9 +65,10 @@ class Parser:
 		return node
 	
 	def inversion(self, tokens):
-		if self.match(tokens.peek(), '~'):
+		if self.match(tokens.peek(), 'NOT'):
 			tokens.pop()
-			node = self.inversion(tokens)
+			inverse = self.inversion(tokens)
+			node = Inverse(inverse)
 		else:
 			node = self.comparison(tokens)
 		return node
