@@ -1,6 +1,7 @@
 from decimal import Decimal
 from abc import ABC, abstractmethod
 from enum import Enum
+import operator
 
 
 class Token:
@@ -84,6 +85,13 @@ class Expr(ASTNode):
 
 
 class BinOp(ASTNode):
+
+	OP_MAP = {
+		'+': operator.add, '-': operator.sub,
+		'*': operator.mul, '/': operator.truediv,
+		'%': operator.mod
+	}
+
 	def __init__(self, left, op, right):
 		self.left = left
 		self.op = op
@@ -94,12 +102,33 @@ class BinOp(ASTNode):
 
 
 class Compare(ASTNode):
+
+	OP_MAP = {
+		'=': operator.eq, '<>': operator.ne,
+		'<': operator.lt, '>': operator.gt,
+		'<=': operator.le, '>=': operator.ge
+	}
+
 	def __init__(self, ops, comparators):
 		self.ops = ops
 		self.comparators = comparators
 
 	def accept(self, visitor):
 		return visitor.visit_Compare(self)
+
+
+class BoolOp(ASTNode):
+
+	OP_MAP = {
+		'OR': lambda a,b: a or b, 'AND': lambda a,b: a and b
+	}
+
+	def __init__(self, op, values):
+		self.op = op
+		self.values = values
+
+	def accept(self, visitor):
+		return visitor.visit_BoolOp(self)
 
 
 class Name(ASTNode):
@@ -139,7 +168,7 @@ class Boolean(ASTNode):
 	FALSE = 'FALSE'
 
 	def __init__(self, value):
-		if value == self.TRUE:
+		if value in (True, self.TRUE):
 			self.value = True
 		else:
 			self.value = False

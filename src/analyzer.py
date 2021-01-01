@@ -34,6 +34,9 @@ class SemanticAnalyzer(Visitor):
     def visit_BinOp(self, binop):
         binop.left.accept(self)
         binop.right.accept(self)
+
+    def visit_BoolOp(self, boolop):
+        [value.accept(self) for value in boolop.values]
     
     def visit_Compare(self, comp):
         [comparator.accept(self) for comparator in comp.comparators]

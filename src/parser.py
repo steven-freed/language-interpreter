@@ -4,7 +4,8 @@ from utils import (
 )
 from nodes import (
 	Number, BinOp, Expr, AST, Token, Context,
-	Assign, Name, String, Boolean, Empty, Compare
+	Assign, Name, String, Boolean, Empty, Compare,
+	BoolOp
 )
 
 		
@@ -45,24 +46,22 @@ class Parser:
 	
 	def disjunction(self, tokens):
 		node = self.conjunction(tokens)
-		ops, comparators = [], [node]
+		values = [node]
 		while self.match(tokens.peek(), 'OR'):
 			op = tokens.pop()
-			comparator = self.conjunction(tokens)
-			ops.append(op.value)
-			comparators.append(comparator)
-			node = Compare(ops, comparators)
+			value = self.conjunction(tokens)
+			values.append(value)
+			node = BoolOp(op.value, values)
 		return node
 	
 	def conjunction(self, tokens):
 		node = self.inversion(tokens)
-		ops, comparators = [], [node]
+		values = [node]
 		while self.match(tokens.peek(), 'AND'):
 			op = tokens.pop()
-			comparator = self.inversion(tokens)
-			ops.append(op.value)
-			comparators.append(comparator)
-			node = Compare(ops, comparators)
+			value = self.conjunction(tokens)
+			values.append(value)
+			node = BoolOp(op.value, values)
 		return node
 	
 	def inversion(self, tokens):
@@ -81,9 +80,7 @@ class Parser:
 			self.match(tokens.peek(), '<=') or \
 			self.match(tokens.peek(), '<') or \
 			self.match(tokens.peek(), '>=') or \
-			self.match(tokens.peek(), '>') or \
-			self.match(tokens.peek(), 'OR') or \
-			self.match(tokens.peek(), 'AND'):
+			self.match(tokens.peek(), '>'):
 			op = tokens.pop()
 			comparator = self.sum(tokens)
 			ops.append(op.value)

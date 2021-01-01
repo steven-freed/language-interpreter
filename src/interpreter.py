@@ -1,9 +1,9 @@
-import sys, traceback, readline, operator
+import sys, traceback, readline
 from utils import apply_operator
 from scanner import Scanner
 from parser import Parser
 from nodes import (
-	Context, Boolean
+	Context, Boolean, BinOp, Compare, BoolOp
 )
 from analyzer import SemanticAnalyzer
 from memory import Heap, Symbol, Scope
@@ -53,26 +53,22 @@ class Interpreter(Visitor):
 			raise TypeException(f'Cannot apply {binop.op} operator to types {left.__class__.__name__} and {right.__class__.__name__}')
 		else:
 			result_node = type(left) or type(right)
-			opmap = {
-				'+': operator.add, '-': operator.sub,
-				'*': operator.mul, '/': operator.truediv,
-				'%': operator.mod
-			}
-			result_value = opmap[binop.op](left.value, right.value)
+			result_value = BinOp.OP_MAP[binop.op](left.value, right.value)
 			return result_node(result_value)
 
+	def visit_BoolOp(self, boolop):
+		op, values = boolop.op, [value.accept(self) for value in boolop.values]
+		result = values[0].value
+		for node in values:
+			result = BoolOp.OP_MAP[op](result, node.value)
+		return Boolean(result)
+
 	def visit_Compare(self, comp):
-		opmap = {
-			'=': operator.eq, '<>': operator.ne,
-			'<': operator.lt, '>': operator.gt,
-			'<=': operator.le, '>=': operator.ge,
-			'OR': lambda a,b: a or b, 'AND': lambda a,b: a and b
-		}
 		ops, comparators = [op for op in comp.ops], [comparator.accept(self) for comparator in comp.comparators]
 		result = True
 		for i, op in enumerate(ops):
-			a, b = comparators[i], comparators[i + 1]
-			result = result and opmap[op](a, b)
+			a, b = comparators[i].value, comparators[i + 1].value
+			result = result and Compare.OP_MAP[op](a, b)
 		return Boolean(result)
 		 
 	def visit_Name(self, name):

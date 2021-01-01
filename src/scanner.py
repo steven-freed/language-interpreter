@@ -8,6 +8,9 @@ class Scanner:
 	def run(self, strinput):
 		return self.scan(strinput)
 
+	def err(self, tok, lineno, lineoff):
+		raise SyntaxError(f'Token "{tok}" not recognized on line {lineno} offset {lineoff}')
+
 	def cache_lineinfo(self, lineno, lineoff):
 		i, j = lineno, lineoff
 		def get_lineinfo():
@@ -70,12 +73,13 @@ class Scanner:
 				lineoff += 1
 			elif bool(re.search(r':', tok)):
 				lineoff += 1
-				expected = ':'
-				while lineoff < len(strinput) and bool(re.search(r'({})'.format(expected), strinput[lineoff])):
-					tok += strinput[lineoff]
+				if strinput[lineoff] == ':':
 					lineoff += 1
-					expected = '='
-				tokens.enqueue(Token('store', tok, get_lineinfo()))
+					if strinput[lineoff] == '=':
+						lineoff += 1
+						tokens.enqueue(Token('store', '::=', get_lineinfo()))
+						continue
+				self.err(tok, lineno, lineoff)
 			elif tok == '{':
 				obj = tok
 				lineoff += 1
@@ -86,5 +90,5 @@ class Scanner:
 			elif tok == '\n':
 				lineno += 1
 			else:
-				raise SyntaxError(f'Token "{tok}" not recognized on line {lineno} offset {lineoff}')
+				self.err(tok, lineno, lineoff)
 		return tokens
