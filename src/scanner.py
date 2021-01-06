@@ -64,6 +64,8 @@ class Scanner:
 					tokens.enqueue(Token(TokenType.NOT, name, get_lineinfo()))
 				elif name == 'return':
 					tokens.enqueue(Token(TokenType.RETURN, name, get_lineinfo()))
+				elif name == 'func':
+					tokens.enqueue(Token(TokenType.FUNC, name, get_lineinfo()))
 				else:
 					tokens.enqueue(Token(TokenType.IDENT, name, get_lineinfo()))
 			elif bool(re.search(r'\s', tok)):

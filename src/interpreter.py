@@ -116,7 +116,7 @@ class Repl:
 		self.scanner = Scanner()
 		self.parser = Parser()
 		self.analyzer = SemanticAnalyzer()
-		self.interpreter = Interpreter()
+		self.interpreter = Interpreter(verbose=True)
 
 	def run(self):
 		print(self.HEADER.format(color=self.Color.HEADER, end=self.Color.END))

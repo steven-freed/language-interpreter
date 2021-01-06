@@ -29,6 +29,7 @@ class TokenType(Enum):
     CLOSED_BRACE =  24
     STORE =         25
     COMMA =         26
+    FUNC =          27
 
 
 class Token:

@@ -20,55 +20,68 @@ class Parser:
 		tree = AST()
 		while len(tokens):
 			tree.add_branch(self.stmt(tokens))
-		print(tree.branches[0].value)
 		return tree
 	@log
 	def stmt(self, tokens):
 		return self.stmts(tokens)
 	@log
 	def stmts(self, tokens):
-		node = self.singular_stmt(tokens)
-		if not node:
+		if self.match(tokens.peek(), (TokenType.FUNC,)):
 			node = self.compound_stmt(tokens)
+		else:
+			node = self.singular_stmt(tokens)
 		return node
 	@log
 	def compound_stmt(self, tokens):
-		if self.match(tokens.peek(), (TokenType.IDENT,)):
+		node = self.callstack.pop()
+		if node: tokens.push(node)
+		if self.match(tokens.peek(), (TokenType.FUNC,)):
+			tokens.pop()
 			node = self.function_dec(tokens)
 		return node
 	@log
 	def function_dec(self, tokens):
-		if self.match(tokens.peek(), (TokenType.IDENT,)):
-			ident = tokens.pop()
-			if self.match(tokens.peek(), (TokenType.OPEN_PAREN,)):
-				tokens.pop()
-				args = []
-				while not self.match(tokens.peek(), (TokenType.CLOSED_PAREN,)):
+		def get_args(tokens):
+			args = []
+			while not self.match(tokens.peek(), (TokenType.CLOSED_PAREN,)):
+				token = tokens.peek()
+				if self.match(token, (TokenType.IDENT,)):
 					arg = self.params(tokens)
 					args.append(arg)
-				if self.match(tokens.peek(), (TokenType.ARROW,)):
+				else:
 					tokens.pop()
-					block = self.block(tokens)
-					node = FunctionDec(ident, args, body=block, returns=None)
+			return args
+		node = None
+		if self.match(tokens.peek(), (TokenType.IDENT,)):
+			ident = self.atom(tokens)
+			if self.match(tokens.peek(), (TokenType.OPEN_PAREN,)):
+				tokens.pop()
+				args = get_args(tokens)
+				tokens.pop() # pop closing paren
+				block = self.block(tokens)
+				returns = self.return_stmt(tokens)
+				node = FunctionDec(ident, args, body=block or [], returns=returns)
 		return node
 	@log
-	def block(self, tokens):
-		if self.match(tokens.peek(), TokenType.OPEN_BRACE):
-			node = self.stmts(tokens)
-		else:
+	def block(self, tokens):	
+		node = self.stmts(tokens)
+		if not node:
 			node = self.singular_stmt(tokens)
 		return node
 	@log
 	def params(self, tokens):
 		param = self.param(tokens)
-		Param(param, default=self.param_default(tokens))
+		param_def = None
+		if self.match(tokens.peek(), (TokenType.EQ,)):
+			param_def = self.param_default(tokens)
+		return Param(param, default=param_def)
 	@log
 	def param_default(self, tokens):
 		default = None
 		if self.match(tokens.peek(), (TokenType.EQ,)):
 			tokens.pop()
-			default = self.expr(tokens)
-		return node
+			default = self.atom(tokens)
+		return default
 	@log
 	def param(self, tokens):
 		name = self.atom(tokens)
@@ -76,7 +89,7 @@ class Parser:
 	@log
 	def singular_stmt(self, tokens):
 		node = self.expr(tokens)
-		if isinstance(node.value, Name) and self.match(tokens.peek(), (TokenType.STORE,)):
+		if isinstance(getattr(node, 'value', None), Name) and self.match(tokens.peek(), (TokenType.STORE,)):
 			tokens.push(self.callstack.pop())
 			node = self.assign(tokens)
 		elif self.match(tokens.peek(), (TokenType.RETURN,)):
@@ -95,7 +108,10 @@ class Parser:
 		return Assign(name, value)
 	@log
 	def expr(self, tokens):
-		return Expr(self.disjunction(tokens))
+		node = self.disjunction(tokens)
+		if node:
+			node = Expr(node)
+		return node
 	@log
 	def disjunction(self, tokens):
 		node = self.conjunction(tokens)
@@ -166,7 +182,7 @@ class Parser:
 	@log
 	def atom(self, tokens):
 		token = tokens.pop()
-		self.callstack.push(token)
+		node = None
 		if isfloat(token.value):
 			node = Number(token.value)
 		elif self.match(token, (TokenType.TRUE, TokenType.FALSE)):
@@ -176,12 +192,11 @@ class Parser:
 		elif self.match(token, (TokenType.CONST,)):
 			node = String(token.value)
 		elif self.match(token, (TokenType.IDENT,)):
-			if self.match(token, (TokenType.STORE,)):
+			if self.match(tokens.peek(), (TokenType.STORE, TokenType.OPEN_PAREN)):
 				node = Name(token.value, Context.STORE)
-			else:
+			elif not self.match(tokens.peek(), (TokenType.OPEN_PAREN,)): # not a function dec
 				node = Name(token.value, Context.LOAD)
-		else:
-			node = None
+		if node: self.callstack.push(token)
 		return node
 
 	def match(self, token, types):

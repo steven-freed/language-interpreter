@@ -123,15 +123,18 @@ class Param(ASTNode):
 		self.ident = ident
 		self.default = default
 	
-	def visit_Param(self, visitor):
+	def accept(self, visitor):
 		return visitor.visit_Param(self)
+
+	def __str__(self):
+		return f'<ident={self.ident}, default={self.default}>'
 
 
 class Return(ASTNode):
 	def __init__(self, value=None):
 		self.value = value
 	
-	def visit_Return(self, visitor):
+	def accept(self, visitor):
 		return visitor.visit_Return(self)
 
 
@@ -142,9 +145,11 @@ class FunctionDec(ASTNode):
 		self.body = body
 		self.returns = returns
 
-	def visit_FunctionDec(self, visitor):
+	def accept(self, visitor):
 		return visitor.visit_FunctionDec(self)
 
+	def __str__(self):
+		return f'<ident={self.ident}, args={self.args}, body={self.body}, returns={self.returns}'
 
 class Name(ASTNode):
 	def __init__(self, ident, context):

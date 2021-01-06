@@ -16,6 +16,9 @@ class Memory:
 
     def discard(self, ident):
         del self.memory[ident]
+
+    def __str__(self):
+        return str(self.memory)
     
 
 class Scope:

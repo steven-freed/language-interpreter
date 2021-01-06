@@ -14,7 +14,7 @@ return_stmt:
 compound_stmt:
     function_dec
 function_dec:
-    [NAME] '(' [params] ')' '->' block
+    'func' [NAME] '(' [params] ')' '->' block
 block:
     | '{' stmts '}'
     | singular_stmt
