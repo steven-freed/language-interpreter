@@ -58,15 +58,17 @@ class Parser:
 				tokens.pop()
 				args = get_args(tokens)
 				tokens.pop() # pop closing paren
-				block = self.block(tokens)
-				returns = self.return_stmt(tokens)
-				node = FunctionDec(ident, args, body=block or [], returns=returns)
+				if self.match(tokens.peek(), (TokenType.ARROW,)):
+					tokens.pop()
+					block = []
+					if self.match(tokens.peek(), (TokenType.OPEN_BRACE,)):
+						block = self.block(tokens)
+					returns = self.return_stmt(tokens)
+					node = FunctionDec(ident, args, body=block or [], returns=returns)
 		return node
 	@log
-	def block(self, tokens):	
+	def block(self, tokens):
 		node = self.stmts(tokens)
-		if not node:
-			node = self.singular_stmt(tokens)
 		return node
 	@log
 	def params(self, tokens):
