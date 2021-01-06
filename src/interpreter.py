@@ -70,6 +70,22 @@ class Interpreter(Visitor):
 			a, b = comparators[i].value, comparators[i + 1].value
 			result = result and Compare.OP_MAP[op](a, b)
 		return Boolean(result)
+
+	def visit_FunctionDec(self, fn):
+		self.heap.add(fn.ident, Symbol(fn.ident, type(fn), Scope.GLOBAL, address=fn))
+
+	def visit_Return(self, returns):
+		if returns.value:
+			return returns.value.accept(self)
+		else:
+			return None
+			
+	def visit_Param(self, param):
+		#TODO add params to symtable for func param.ident.accept(self)
+		if param.default:
+			return param.default.accept(self)
+		else:
+			return None
 		 
 	def visit_Name(self, name):
 		if name.context == Context.LOAD:

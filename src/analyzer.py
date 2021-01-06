@@ -45,6 +45,21 @@ class SemanticAnalyzer(Visitor):
         if not self.symtable.get(name.ident):
             raise UndeclaredException(f'Attempted to use variable "{name.ident}" before declaration')
 
+    def visit_FunctionDec(self, fn):
+        self.symtable.add(fn.ident, Symbol(fn.ident, type(fn), Scope.GLOBAL))
+        [arg.accept(self) for arg in fn.args]
+        [node.accept(self) for node in fn.body]
+        fn.returns.accept(self)
+
+    def visit_Return(self, returns):
+        if returns.value:
+            returns.value.accept(self)
+
+    def visit_Param(self, param):
+        #TODO add params to symtable for func param.ident.accept(self)
+        if param.default:
+            param.default.accept(self)
+
     def visit_Inverse(self, inverse):
         inverse.value.accept(self)
     
