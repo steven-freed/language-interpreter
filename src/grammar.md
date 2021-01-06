@@ -14,12 +14,12 @@ return_stmt:
 compound_stmt:
     function_dec
 function_dec:
-    'func' [NAME] '(' [params] ')' '->' block
+    'func' [NAME] '(' [params] ')' '->' (block | expr)
 block:
-    | '{' stmts '}'
-    | singular_stmt
+    '{' stmts '}'
 params:
-    param [param_default] (',' | ')')
+    | param [param_default] ','
+    | param [param_default]
 param_default:
     '=' expression
 param:
@@ -43,7 +43,14 @@ term:
     factor { ('*' | '/' | '%') factor }
 factor:
     | '(' expr ')'
+    | invocation
+invocation:
+    | NAME '(' [args] ')'
     | atom
+args:
+    atom [',']
+arg:
+    atom
 atom:
     | NUMBER
     | NAME

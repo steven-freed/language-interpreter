@@ -33,15 +33,9 @@ class Scanner:
 					lineoff += 1
 				lineoff += 1
 				tokens.enqueue(Token(TokenType.CONST, string, get_lineinfo()))
-			elif bool(re.search(r'[0-9]', tok)) or tok == '-':
+			elif bool(re.search(r'[0-9]', tok)):
 				number = tok
 				lineoff += 1
-				if tok == '-' and lineoff < len(strinput):
-					number += strinput[lineoff]
-					lineoff += 1
-					if number == '->':
-						tokens.enqueue(Token(TokenType.ARROW, number, get_lineinfo()))
-						continue
 				while lineoff < len(strinput) and (strinput[lineoff] == '.' or bool(re.search(r'[0-9]', strinput[lineoff]))):
 					number += strinput[lineoff]
 					lineoff += 1
@@ -74,8 +68,16 @@ class Scanner:
 			elif bool(re.search(r'[-+*/%]', tok)):
 				if tok == '+':
 					tokentype = TokenType.PLUS
-				elif tok == '-':
-					tokentype = TokenType.MINUS
+				elif tok == '-' and lineoff + 1 < len(strinput):
+					lineoff += 1
+					minus_or_arrow = tok + strinput[lineoff]
+					if minus_or_arrow == '->':
+						tokens.enqueue(Token(TokenType.ARROW, minus_or_arrow, get_lineinfo()))
+						lineoff += 1
+						continue
+					else:
+						lineoff -= 1
+						tokentype = TokenType.MINUS
 				elif tok == '/':
 					tokentype = TokenType.DIV
 				elif tok == '*':

@@ -1,5 +1,5 @@
 # Interpreter #
-Interpreter Written in Python. The language currently supports Mathmatical operations & comparisons, boolean operations, and variables.
+Interpreter Written in Python. The Language is still in progress...
 
 ### EBNF Grammar ###
 found in /src/grammar.md
@@ -12,13 +12,13 @@ found in /src/grammar.md
 > python interpreter.py
 ```
 
-3. Enter Expression
+3. Expressions
 ```py
 > 2 + 4 * 5
 22
 ```
 
-If Needed Use Precedence (Default is Left Associative)
+Precedence (Default is Left Associative)
 ```py
 > (2 + 4) % 5
 1
@@ -30,7 +30,7 @@ TRUE
 FALSE
 ```
 
-4. Declare variables for types; Empty, String, Number, Boolean
+4. Data Types; Empty, String, Number, Boolean
 ```py
 > x ::= {}
 > x ::= "hello"
@@ -39,6 +39,18 @@ FALSE
 > x ::= 123.45
 > x ::= TRUE
 > x ::= FALSE
+```
+
+* Functions and Lambda Functions
+```py
+> func foo(x, y) -> { 
+    return x + y
+}
+> func bar(x, y) -> x * y
+> foo(1, 2)
+3
+> bar(3, 3)
+9
 ```
 
 *To See History Press 'Up Arrow' Key*

@@ -1,11 +1,11 @@
 from nodes import (
-    Visitor, BinOp, Context
+    Visitor, BinOp, Context, Return
 )
 from memory import (
     SymbolTable, Symbol, Scope
 )
 from exc import (
-	UndeclaredException, ParamException
+	UndeclaredException, ArgException
 )
 
 
@@ -52,16 +52,23 @@ class SemanticAnalyzer(Visitor):
             if arg.default:
                 defaults_started = True
             if not arg.default and defaults_started:
-                raise ParamException(f'Non-default valued argument "{arg.ident.ident}" follows default valued argument')
-        [arg.accept(self) for arg in fn.args]
-        [node.accept(self) for node in fn.body]
-        fn.returns.accept(self)
+                raise ArgException(f'Non-default valued argument "{arg.ident}" follows default valued argument')
+            self.symtable.add(arg.ident, Symbol(arg.ident, type(arg.default), fn.ident))
+        for node in fn.body:
+            print('NODE', node)
+            if fn.lambda_ and isinstance(node, Return) or len(fn.body) > 1:
+                raise SyntaxError(f'Invalid lambda function declaration')
+            node.accept(self)
+
+    def visit_FunctionCall(self, call):
+        if not self.symtable.get(call.ident):
+            raise UndeclaredException(f'Attempted to call function "{call.ident}" before declaration')
 
     def visit_Return(self, returns):
         if returns.value:
             returns.value.accept(self)
 
-    def visit_Param(self, param):
+    def visit_Arg(self, arg):
         pass
 
     def visit_Inverse(self, inverse):

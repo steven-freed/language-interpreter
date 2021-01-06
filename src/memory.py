@@ -41,10 +41,10 @@ class Symbol:
 class Heap(Memory):
     
     def __init__(self, verbose=False):
-       super().__init__(verbose=False)
+       super().__init__(verbose=verbose)
 
 
 class SymbolTable(Memory):
 
-   def __init__(self):
-       super().__init__()
+   def __init__(self, verbose=False):
+       super().__init__(verbose=verbose)

@@ -2,7 +2,7 @@ import sys, traceback, readline, math
 from scanner import Scanner
 from parser import Parser
 from nodes import (
-	Context, Boolean, BinOp, Compare, BoolOp
+	Context, Boolean, BinOp, Compare, BoolOp, Return
 )
 from analyzer import SemanticAnalyzer
 from memory import Heap, Symbol, Scope
@@ -73,19 +73,29 @@ class Interpreter(Visitor):
 
 	def visit_FunctionDec(self, fn):
 		self.heap.add(fn.ident, Symbol(fn.ident, type(fn), Scope.GLOBAL, address=fn))
+		for arg in fn.args:
+			arg.accept(self)
+			self.heap.add(arg.ident, Symbol(arg.ident, type(arg.default), fn.ident, address=arg))
+
+	def visit_FunctionCall(self, call):
+		fn = self.heap.get(call.ident).address
+		for call_val, arg in zip(call.args, fn.args):
+			# replaces Arg nodes with function call param values by binding
+			# call values to function Arg node idents
+			arg = self.heap.get(arg.ident)
+			self.heap.add(arg.ident, Symbol(arg.ident, type(call_val.value), fn.ident, address=call_val))
+		returns = None
+		for node in fn.body:
+			value = node.accept(self)
+			if isinstance(node, Return) or fn.lambda_:
+				returns = value
+		return returns
 
 	def visit_Return(self, returns):
-		if returns.value:
-			return returns.value.accept(self)
-		else:
-			return None
+		return returns.value.accept(self) if returns.value else None
 			
-	def visit_Param(self, param):
-		#TODO add params to symtable for func param.ident.accept(self)
-		if param.default:
-			return param.default.accept(self)
-		else:
-			return None
+	def visit_Arg(self, arg):
+		return arg.default.accept(self) if arg.default else None
 		 
 	def visit_Name(self, name):
 		if name.context == Context.LOAD:

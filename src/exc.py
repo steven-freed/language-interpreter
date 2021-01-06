@@ -9,6 +9,6 @@ class UndeclaredException(Exception):
         super().__init__(msg)
 
 
-class ParamException(Exception):
+class ArgException(Exception):
     def __init__(self, msg):
         super().__init__(msg)

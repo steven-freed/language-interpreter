@@ -62,6 +62,9 @@ class Assign(ASTNode):
 	def accept(self, visitor):
 		return visitor.visit_Assign(self)
 
+	def __repr__(self):
+		return f'<target={self.target}, value={self.value}>'
+
 
 class Expr(ASTNode):
 	def __init__(self, value):
@@ -69,6 +72,9 @@ class Expr(ASTNode):
 
 	def accept(self, visitor):
 		return visitor.visit_Expr(self)
+
+	def __repr__(self):
+		return f'<value={self.value}>'
 
 
 class BinOp(ASTNode):
@@ -87,6 +93,9 @@ class BinOp(ASTNode):
 	def accept(self, visitor):
 		return visitor.visit_BinOp(self)
 
+	def __repr__(self):
+		return f'<left={self.left}, op={self.op}, right={self.right}>'
+
 
 class Compare(ASTNode):
 
@@ -103,6 +112,9 @@ class Compare(ASTNode):
 	def accept(self, visitor):
 		return visitor.visit_Compare(self)
 
+	def __repr__(self):
+		return f'<ops={self.ops}, comparators={self.comparators}>'
+
 
 class BoolOp(ASTNode):
 
@@ -117,14 +129,17 @@ class BoolOp(ASTNode):
 	def accept(self, visitor):
 		return visitor.visit_BoolOp(self)
 
+	def __repr__(self):
+		return f'<op={self.op}, values={self.values}>'
 
-class Param(ASTNode):
+
+class Arg(ASTNode):
 	def __init__(self, ident, default=None):
 		self.ident = ident
 		self.default = default
 	
 	def accept(self, visitor):
-		return visitor.visit_Param(self)
+		return visitor.visit_Arg(self)
 
 	def __str__(self):
 		return f'<ident={self.ident}, default={self.default}>'
@@ -137,19 +152,35 @@ class Return(ASTNode):
 	def accept(self, visitor):
 		return visitor.visit_Return(self)
 
+	def __repr__(self):
+		return f'<value={self.value}>'
+
 
 class FunctionDec(ASTNode):
-	def __init__(self, ident, args=[], body=[], returns=None):
+	def __init__(self, ident, args, body, lambda_=False):
 		self.ident = ident
-		self.args = args
-		self.body = body
-		self.returns = returns
+		self.args = args or []
+		self.body = body or []
+		self.lambda_ = lambda_
 
 	def accept(self, visitor):
 		return visitor.visit_FunctionDec(self)
 
-	def __str__(self):
-		return f'<ident={self.ident}, args={self.args}, body={self.body}, returns={self.returns}'
+	def __repr__(self):
+		return f'<ident={self.ident}, args={self.args}, body={self.body}, lambda={self.lambda_}>'
+
+
+class FunctionCall(ASTNode):
+	def __init__(self, ident, args):
+		self.ident = ident
+		self.args = args or []
+
+	def accept(self, visitor):
+		return visitor.visit_FunctionCall(self)
+
+	def __repr__(self):
+		return f'<ident={self.ident}, args={self.args}>'
+
 
 class Name(ASTNode):
 	def __init__(self, ident, context):
@@ -158,6 +189,9 @@ class Name(ASTNode):
 
 	def accept(self, visitor):
 		return visitor.visit_Name(self)
+
+	def __repr__(self):
+		return f'<ident={self.ident}, context={self.context}>'
 
 
 class Number(ASTNode):
@@ -170,6 +204,9 @@ class Number(ASTNode):
 	def __str__(self):
 		return str(self.value)
 
+	def __repr__(self):
+		return f'<value={self.value}>'
+
 
 class String(ASTNode):
 	def __init__(self, value):
@@ -180,6 +217,9 @@ class String(ASTNode):
 
 	def __str__(self):
 		return '"' + str(self.value) + '"'
+
+	def __repr__(self):
+		return f'<value={self.value}>'
 
 
 class Boolean(ASTNode):
@@ -202,6 +242,9 @@ class Boolean(ASTNode):
 		else:
 			return self.FALSE
 
+	def __repr__(self):
+		return f'<value={str(self)}>'
+
 
 class Inverse(ASTNode):
 	def __init__(self, value):
@@ -216,6 +259,9 @@ class Inverse(ASTNode):
 		else:
 			return Boolean.FALSE
 
+	def __repr__(self):
+		return f'<value={str(self)}>'
+
 
 class Empty(ASTNode):
 	def __init__(self, value=None):
@@ -226,6 +272,9 @@ class Empty(ASTNode):
 
 	def __str__(self):
 		return "{}"
+
+	def __repr__(self):
+		return f'<value={str(self)}>'
 
 
 class Context:
