@@ -5,7 +5,7 @@ from memory import (
     SymbolTable, Symbol, Scope
 )
 from exc import (
-	UndeclaredException
+	UndeclaredException, ParamException
 )
 
 
@@ -47,6 +47,12 @@ class SemanticAnalyzer(Visitor):
 
     def visit_FunctionDec(self, fn):
         self.symtable.add(fn.ident, Symbol(fn.ident, type(fn), Scope.GLOBAL))
+        defaults_started = False
+        for arg in fn.args:
+            if arg.default:
+                defaults_started = True
+            if not arg.default and defaults_started:
+                raise ParamException(f'Non-default valued argument "{arg.ident.ident}" follows default valued argument')
         [arg.accept(self) for arg in fn.args]
         [node.accept(self) for node in fn.body]
         fn.returns.accept(self)
@@ -56,9 +62,7 @@ class SemanticAnalyzer(Visitor):
             returns.value.accept(self)
 
     def visit_Param(self, param):
-        #TODO add params to symtable for func param.ident.accept(self)
-        if param.default:
-            param.default.accept(self)
+        pass
 
     def visit_Inverse(self, inverse):
         inverse.value.accept(self)

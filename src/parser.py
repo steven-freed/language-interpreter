@@ -60,9 +60,10 @@ class Parser:
 				tokens.pop() # pop closing paren
 				if self.match(tokens.peek(), (TokenType.ARROW,)):
 					tokens.pop()
-					block = []
 					if self.match(tokens.peek(), (TokenType.OPEN_BRACE,)):
 						block = self.block(tokens)
+					else:
+						block = []
 					returns = self.return_stmt(tokens)
 					node = FunctionDec(ident, args, body=block or [], returns=returns)
 		return node
