@@ -29,7 +29,7 @@ class SemanticAnalyzer(Visitor):
     def visit_Assign(self, assign):
         name = assign.target
         self.symtable.add(name.ident, Symbol(name.ident, type(assign.value), Scope.GLOBAL))
-        assign.value.accept(self)
+        value = assign.value.accept(self)
 
     def visit_BinOp(self, binop):
         binop.left.accept(self)
@@ -45,8 +45,8 @@ class SemanticAnalyzer(Visitor):
         if not self.symtable.get(name.ident):
             raise UndeclaredException(f'Attempted to use variable "{name.ident}" before declaration')
 
-    def visit_FunctionDec(self, fn):
-        self.symtable.add(fn.ident, Symbol(fn.ident, type(fn), Scope.GLOBAL))
+    def visit_Function(self, fn):
+        #self.symtable.add(fn.ident, Symbol(fn.ident, type(fn), Scope.GLOBAL))
         defaults_started = False
         for arg in fn.args:
             if arg.default:
@@ -54,11 +54,6 @@ class SemanticAnalyzer(Visitor):
             if not arg.default and defaults_started:
                 raise ArgException(f'Non-default valued argument "{arg.ident}" follows default valued argument')
             self.symtable.add(arg.ident, Symbol(arg.ident, type(arg.default), fn.ident))
-        for node in fn.body:
-            print('NODE', node)
-            if fn.lambda_ and isinstance(node, Return) or len(fn.body) > 1:
-                raise SyntaxError(f'Invalid lambda function declaration')
-            node.accept(self)
 
     def visit_FunctionCall(self, call):
         if not self.symtable.get(call.ident):

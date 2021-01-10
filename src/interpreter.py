@@ -71,8 +71,8 @@ class Interpreter(Visitor):
 			result = result and Compare.OP_MAP[op](a, b)
 		return Boolean(result)
 
-	def visit_FunctionDec(self, fn):
-		self.heap.add(fn.ident, Symbol(fn.ident, type(fn), Scope.GLOBAL, address=fn))
+	def visit_Function(self, fn):
+		#self.heap.add(fn.ident, Symbol(fn.ident, type(fn), Scope.GLOBAL, address=fn))
 		for arg in fn.args:
 			arg.accept(self)
 			self.heap.add(arg.ident, Symbol(arg.ident, type(arg.default), fn.ident, address=arg))

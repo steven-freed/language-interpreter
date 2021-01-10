@@ -156,18 +156,16 @@ class Return(ASTNode):
 		return f'<value={self.value}>'
 
 
-class FunctionDec(ASTNode):
-	def __init__(self, ident, args, body, lambda_=False):
-		self.ident = ident
+class Function(ASTNode):
+	def __init__(self, args, body):
 		self.args = args or []
 		self.body = body or []
-		self.lambda_ = lambda_
 
 	def accept(self, visitor):
-		return visitor.visit_FunctionDec(self)
+		return visitor.visit_Function(self)
 
 	def __repr__(self):
-		return f'<ident={self.ident}, args={self.args}, body={self.body}, lambda={self.lambda_}>'
+		return f'<args={self.args}, body={self.body}>'
 
 
 class FunctionCall(ASTNode):

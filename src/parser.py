@@ -5,7 +5,7 @@ from tokens import Token, TokenType
 from nodes import (
 	Number, BinOp, Expr, AST, Context,
 	Assign, Name, String, Boolean, Empty, Compare,
-	BoolOp, Inverse, FunctionDec, Arg, Return,
+	BoolOp, Inverse, Function, Arg, Return,
 	FunctionCall
 )
 
@@ -22,24 +22,14 @@ class Parser:
 		while len(tokens):
 			stmt = self.stmt(tokens)
 			tree.add_branch(stmt)
+		print('AST\t', tree.branches)
 		return tree
 	@log
 	def stmt(self, tokens):
 		return self.stmts(tokens)
 	@log
 	def stmts(self, tokens):
-		if self.match(tokens.peek(), (TokenType.FUNC,)):
-			node = self.compound_stmt(tokens)
-		else:
-			node = self.singular_stmt(tokens)
-		return node
-	@log
-	def compound_stmt(self, tokens):
-		node = self.callstack.pop()
-		if node: tokens.push(node)
-		if self.match(tokens.peek(), (TokenType.FUNC,)):
-			tokens.pop()
-			node = self.function_dec(tokens)
+		node = self.singular_stmt(tokens)
 		return node
 	@log
 	def function_dec(self, tokens):
@@ -53,28 +43,22 @@ class Parser:
 				else:
 					tokens.pop()
 			return args
-		if self.match(tokens.peek(), (TokenType.IDENT,)):
-			name = self.atom(tokens)
-			if self.match(tokens.peek(), (TokenType.OPEN_PAREN,)):
-				tokens.pop()
-				args = get_args(tokens)
+		node = None
+		if self.match(tokens.peek(), (TokenType.OPEN_PAREN,)):
+			tokens.pop()
+			args = get_args(tokens)
+			if self.match(tokens.peek(), (TokenType.CLOSED_PAREN,)):
 				tokens.pop() # pop closing paren
-				if self.match(tokens.peek(), (TokenType.ARROW,)):
+				body = []
+				if self.match(tokens.peek(), (TokenType.OPEN_BRACE,)):
+					fnbody = self.block(tokens)
+				if fnbody:
+					body.append(fnbody)
+				if self.match(tokens.peek(), (TokenType.CLOSED_BRACE,)):
 					tokens.pop()
-					body = []
-					if self.match(tokens.peek(), (TokenType.OPEN_BRACE,)):
-						islambda = False
-						fnbody = self.block(tokens)
-					else:
-						islambda = True
-						fnbody = self.expr(tokens)
-					if fnbody:
-						body.append(fnbody)
-					if not islambda and self.match(tokens.peek(), (TokenType.CLOSED_BRACE,)):
-						tokens.pop()
-					node = FunctionDec(name.ident, args, body=body, lambda_=islambda)
-				else:
-					raise SyntaxError(f'Invalid function declaration')
+					node = Function(args, body=body)
+		if not node:
+			raise SyntaxError(f'Invalid function declaration')
 		return node
 	@log
 	def block(self, tokens):
@@ -99,24 +83,30 @@ class Parser:
 		return getattr(name, 'ident', None)
 	@log
 	def singular_stmt(self, tokens):
-		node = self.expr(tokens)
-		if isinstance(getattr(node, 'value', None), Name) and self.match(tokens.peek(), (TokenType.STORE,)):
-			tokens.push(self.callstack.pop())
-			node = self.assign(tokens)
-		elif self.match(tokens.peek(), (TokenType.RETURN,)):
+		if self.match(tokens.peek(), (TokenType.RETURN,)):
 			tokens.pop()
-			node = self.return_stmt(tokens)
+			node = Return(self.expr(tokens))
+		elif self.match(tokens.peek(), (TokenType.IDENT,)):
+			node = self.assign(tokens)
+		else:
+			node = self.expr(tokens)
+		if not node:
+			tokens.push(self.callstack.pop())
+			node = self.expr(tokens)
 		return node
 	@log
-	def return_stmt(self, tokens):
-		expr = self.expr(tokens)
-		return Return(expr)
-
 	def assign(self, tokens):
+		node = None
 		name = self.atom(tokens)
-		tokens.pop()
-		value = self.expr(tokens)
-		return Assign(name, value)
+		if self.match(tokens.peek(), (TokenType.STORE,)):
+			tokens.pop()
+			if self.match(tokens.peek(), (TokenType.FUNC,)):
+				tokens.pop()
+				value = self.function_dec(tokens)
+			else:
+				value = self.expr(tokens)
+			node = Assign(name, value)
+		return node
 	@log
 	def expr(self, tokens):
 		node = self.disjunction(tokens)

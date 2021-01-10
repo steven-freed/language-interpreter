@@ -4,28 +4,24 @@ stmt:
     stmts
 stmts:
     | singular_stmt
-    | compound_stmt
 singular_stmt:
     | expr
     | assign
     | return_stmt
 return_stmt:
     'return' [expr]
-compound_stmt:
-    function_dec
 function_dec:
-    'func' [NAME] '(' [params] ')' '->' (block | expr)
+    'func' '(' [params] ')' block
 block:
     '{' stmts '}'
 params:
-    | param [param_default] ','
-    | param [param_default]
+    | param [param_default] [‘,’]
 param_default:
     '=' expression
 param:
     NAME
 assign:
-    NAME '::=' expr
+    NAME '::=' ( expr | function_dec )
 expr:
     disjuncton
 disjunction:
@@ -48,9 +44,10 @@ invocation:
     | NAME '(' [args] ')'
     | atom
 args:
-    atom [',']
+    | arg [',']
 arg:
-    atom
+    | atom [‘,’]
+    | function_dec [‘,’]
 atom:
     | NUMBER
     | NAME
